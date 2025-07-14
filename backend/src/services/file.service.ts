@@ -1,35 +1,47 @@
 import { FileRepository } from "../repositories/file.repository"
 import { unlinkSync, writeFileSync, mkdirSync, existsSync, createReadStream } from "fs"
 import { join } from "path"
+import { randomBytes } from "crypto"
 
 export const FileService = {
-    uploadFile: async (file: File, folderId?: number) => {
-        const buffer = Buffer.from(await file.arrayBuffer())
+    uploadFile: async (file: File | File[], folderId?: number) => {
         const uploadDir = "uploads"
-
-        // Buat folder jika belum ada
         if (!existsSync(uploadDir)) {
-            mkdirSync(uploadDir)
+            mkdirSync(uploadDir, { recursive: true })
         }
 
-        const filePath = join(uploadDir, file.name)
-        writeFileSync(filePath, buffer)
+        const processSingleFile = async (f: File) => {
+            const arrayBuffer = await f.arrayBuffer()
+            const buffer = Buffer.from(arrayBuffer)
+            const ext = f.name.includes(".") ? f.name.substring(f.name.lastIndexOf(".")) : ""
+            const randomName = `${randomBytes(16).toString("hex")}${ext}`
+            const filePath = join(uploadDir, randomName)
 
-        const saved = await FileRepository.create({
-            name: file.name,
-            path: filePath,
-            size: file.size,
-            mimeType: file.type,
-            folderId,
-        })
+            writeFileSync(filePath, buffer)
 
-        return saved
+            return await FileRepository.create({
+                name: f.name,
+                path: filePath,
+                size: f.size,
+                mimeType: f.type,
+                folderId,
+            })
+        }
+
+        if (Array.isArray(file)) {
+            const savedFiles = await Promise.all(file.map(processSingleFile))
+            return savedFiles // return array of saved entries
+        } else {
+            const savedFile = await processSingleFile(file)
+            return savedFile // return single saved entry
+        }
     },
-
 
     getFilesInFolder: (folderId: number) => FileRepository.findByFolderId(folderId),
 
     getFileById: (id: number) => FileRepository.findById(id),
+
+    getRootFiles: () => FileRepository.findRootFiles(),
 
     streamFile: async (id: number) => {
         const file = await FileRepository.findById(id)
@@ -53,7 +65,7 @@ export const FileService = {
             'application/json',
             'image/svg+xml'
         ]
-        
+
         const mimeMainType = file.mimeType.split(';')[0].trim()
         const isInline = inlineMimeTypes.includes(mimeMainType)
 

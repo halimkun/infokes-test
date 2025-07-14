@@ -13,5 +13,7 @@ export const FileRepository = {
 
     findById: (id: number) => prisma.file.findUnique({ where: { id } }),
 
+    findRootFiles: () => prisma.file.findMany({ where: { folderId: null } }),
+
     delete: (id: number) => prisma.file.delete({ where: { id } }),
 }
