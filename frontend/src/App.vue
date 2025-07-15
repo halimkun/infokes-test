@@ -1,6 +1,6 @@
 <template>
   <div class="p-4 h-screen space-y-4">
-    <div class="h-14 flex items-center justify-between bg-zinc-900 px-5 py-2 rounded-lg border border-zinc-700">
+    <div class="h-14 flex items-center justify-between dark:bg-zinc-900 px-5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700">
       <p class="leading-none text-xl font-semibold">File Explorer</p>
       <div class="flex gap-3">
         <Button raised rounded variant="outlined" icon="pi pi-folder-plus" @click="openModal" severity="success" size="small" />
@@ -8,7 +8,7 @@
       </div>
     </div>
 
-    <div class="h-[calc(100vh-7rem)] border border-zinc-700 rounded-lg overflow-hidden anti-aliased">
+    <div class="h-[calc(100vh-7rem)] border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden anti-aliased">
       <Splitter class="h-full">
         <SplitterPanel class="hidden md:block" :size="20" :minSize="20">
           <ScrollPanel class="w-full h-full max-h-full">
@@ -47,11 +47,10 @@
             </template>
           </template>
           <template v-else>
-            <div class="h-full flex items-center justify-center">
-              <div class="text-center text-gray-500">
-                <p class="text-lg">Select a folder to view its contents</p>
-                <p class="text-sm">Files will open in a new tab</p>
-              </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-4 p-4">
+              <template v-for="node in nodes" :key="node.key">
+                <ItemGrid :child="node" :onNodeSelect="onNodeSelect" />
+              </template>
             </div>
           </template>
         </SplitterPanel>
@@ -98,6 +97,7 @@ const selectedKey = ref(null)
 const expandedKeys = ref({});
 const nodes = ref([])
 const node = ref(null)
+const breadcrumb = ref([])
 
 const uploadUrl = computed(() => {
   const id = node.value?.data?.id
@@ -169,6 +169,7 @@ const fetchFiles = async (endpoint) => {
 onMounted(async () => {
   const rootFolders = await fetchFolders('/api/folders/root')
   const rootFiles = await fetchFiles('/api/files/root')
+  
   nodes.value = [
     ...rootFolders.map(mapFolderToNode),
     ...rootFiles.map(mapFileToNode)
@@ -205,6 +206,7 @@ const onNodeSelect = (n) => {
   }
 
   selectedKey.value = n.key
+  breadcrumb.value = n.data.name ? [{ label: n.data.name, key: n.key }] : []
   if (expandedKeys.value[n.key]) {
     delete expandedKeys.value[n.key]
   } else {

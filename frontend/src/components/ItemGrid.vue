@@ -1,5 +1,5 @@
 <template>
-    <div class="h-40 flex flex-col items-center justify-center bg-zinc-900 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer space-y-3 p-4 border border-zinc-700"
+    <div class="h-40 flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-900 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer space-y-3 p-4 border border-zinc-200 dark:border-zinc-700"
         @click="props.onNodeSelect(props.child)">
         <i :class="getStyle(child)['icon']" style="font-size: 2rem"></i>
         <span :class="getStyle(child)['text']" class="overflow-hidden text-ellipsis whitespace-nowrap w-full text-center">
@@ -25,17 +25,17 @@ const getStyle = (child) => {
     if (child.data.mimeType && child.data.mimeType.startsWith('image/')) {
         return {
             icon: 'pi pi-image',
-            text: 'text-sm font-semibold tracking-wide text-gray-300'
+            text: 'text-sm font-semibold tracking-wide'
         };
     } else if (child.data.mimeType && child.data.mimeType.startsWith('video/')) {
         return {
             icon: 'pi pi-video',
-            text: 'text-sm font-semibold tracking-wide text-gray-300'
+            text: 'text-sm font-semibold tracking-wide'
         };
     } else if (child.data.mimeType && child.data.mimeType.startsWith('audio/')) {
         return {
             icon: 'pi pi-music',
-            text: 'text-sm font-semibold tracking-wide text-gray-300'
+            text: 'text-sm font-semibold tracking-wide'
         };
     } else if (child.data.mimeType && child.data.mimeType.includes('pdf')) {
         return {
@@ -45,17 +45,17 @@ const getStyle = (child) => {
     } else if (child.data.type === 'file') {
         return {
             icon: 'pi pi-file',
-            text: 'text-sm font-semibold tracking-wide text-gray-300'
+            text: 'text-sm font-semibold tracking-wide'
         };
     } else if (child.data.type === 'folder') {
         return {
-            icon: 'pi pi-folder text-yellow-400',
-            text: 'text-sm font-semibold tracking-wide text-yellow-400'
+            icon: 'pi pi-folder text-yellow-500 dark:text-yellow-400',
+            text: 'text-sm font-semibold tracking-wide text-yellow-500 dark:text-yellow-400'
         };
     } else {
         return {
             icon: 'pi pi-question-circle',
-            text: 'text-sm font-semibold tracking-wide text-gray-400'
+            text: 'text-sm font-semibold tracking-wide'
         };
     }
 };
